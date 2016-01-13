@@ -2,8 +2,9 @@
 #define CIRCULAR_FIFO_H_
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct {
     uint32_t size;
@@ -54,5 +55,59 @@ static uint8_t pop(CircularFifo *fifo) {
     return item; 
 }
 
+static uint8_t peak(CircularFifo *fifo) {
+    uint8_t item = fifo->data[fifo->head];
+    fifo->head++;
+    return item; 
+}
+
+static void pushMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
+    if(fifo->tail + size > fifo->size) {
+        uint32_t upperSize = fifo->size - fifo->tail;
+        memcpy(&fifo->data[fifo->tail], data, upperSize);
+        uint32_t lowerSize = size - upperSize;
+        memcpy(fifo->data, &data[upperSize], lowerSize);
+        fifo->tail = lowerSize;
+    }
+    else {
+        memcpy(&fifo->data[fifo->tail], data, size);
+        fifo->tail += size;
+        if(fifo->tail >= fifo->size) {
+            fifo->tail = 0;
+        } 
+    }
+}
+
+
+static void peakMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
+    if(fifo->head + size > fifo->size) {
+        uint32_t upperSize = fifo->size - fifo->head;
+        memcpy(data, &fifo->data[fifo->head], upperSize);
+        uint32_t lowerSize = size - upperSize;
+        memcpy(&data[upperSize], &fifo->data, lowerSize);
+    }
+    else {
+        memcpy(data, &fifo->data[fifo->head], size);
+    }
+}
+
+
+static void popMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
+    peakMultiple(fifo, data, size);   
+    if(fifo->head + size > fifo->size) {
+        uint32_t upperSize = fifo->size - fifo->head;
+        uint32_t lowerSize = size - upperSize;
+        fifo->head = lowerSize;
+    }
+    else {
+        fifo->head += size;
+        if(fifo->head >= fifo->size) {
+            fifo->head = 0;
+        }    
+    }
+}
+
 #endif
+
+
 
