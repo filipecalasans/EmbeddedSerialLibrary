@@ -2,7 +2,21 @@
 
 #include <stdio.h>
 
-#define FIFO_SIZE   1024
+#define FIFO_SIZE  7 
+
+void printFifo(CircularFifo *fifo) {
+    printf("FIFO: ");
+    uint32_t currentHead = fifo->head;
+
+    while(currentHead != fifo->tail) {
+        printf("%d,", fifo->data[currentHead++]);
+        if(currentHead == fifo->size) {
+            currentHead = 0;
+        } 
+    }
+    printf("\n"); 
+}
+
 
 int main () {
     
@@ -20,6 +34,7 @@ int main () {
     push(&fifo, 10);
     push(&fifo, 11);
     push(&fifo, 12);
+    printFifo(&fifo);
 
     printf("pop: %d\n", (int)pop(&fifo));
     printf("pop: %d\n", (int)pop(&fifo));
@@ -29,14 +44,19 @@ int main () {
     printf("size %d\n", (int)getSize(&fifo));
     printf("isEmpty? %d\n", (int)isEmpty(&fifo));
     printf("num elements %d\n", (int)getNumElements(&fifo));
-    
+    printFifo(&fifo);
+ 
     push(&fifo, 13);
     printf("pop: %d\n", (int)pop(&fifo));
+    printFifo(&fifo);
     push(&fifo, 14);
     printf("pop: %d\n", (int)pop(&fifo));
+    printFifo(&fifo);
     push(&fifo, 15);
     printf("pop: %d\n", (int)pop(&fifo));
+    printFifo(&fifo);
     printf("pop: %d\n", (int)pop(&fifo));
+    printFifo(&fifo);
     
     printf("size %d\n", (int)getSize(&fifo));
     printf("isEmpty? %d\n", (int)isEmpty(&fifo));
@@ -44,9 +64,12 @@ int main () {
     
     printf("--------- Multiples Insertions/Remotions\n");
     
-    uint8_t insertItens[1023] = {10};
+    uint8_t insertItens[6] = {1, 2, 4, 8, 10, 12};
     
-    pushMultiple(&fifo, insertItens, 1023);
+    pushMultiple(&fifo, insertItens, 6);
+    printFifo(&fifo);
+    popMultiple(&fifo, insertItens, 4);
+    printFifo(&fifo);
     printf("size %d\n", (int)getSize(&fifo));
     printf("isEmpty? %d\n", (int)isEmpty(&fifo));
     printf("num elements %d\n", (int)getNumElements(&fifo));

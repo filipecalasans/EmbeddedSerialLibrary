@@ -91,9 +91,7 @@ static void peakMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
     }
 }
 
-
-static void popMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
-    peakMultiple(fifo, data, size);   
+static void discardMultiple(CircularFifo *fifo, uint32_t size){
     if(fifo->head + size > fifo->size) {
         uint32_t upperSize = fifo->size - fifo->head;
         uint32_t lowerSize = size - upperSize;
@@ -105,6 +103,11 @@ static void popMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
             fifo->head = 0;
         }    
     }
+}
+
+static void popMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
+    peakMultiple(fifo, data, size);   
+    discardMultiple(fifo, size);
 }
 
 #endif
