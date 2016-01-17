@@ -8,9 +8,5 @@
 
 void initSerialHAL();
 
-void (*processRawDataCallBack)(uint8_t *, uint32_t) = NULL;
-void (*processCommandCallBack)(char *) = NULL;
-void (*processBinaryPacketCallBack)(char *) = NULL;
-void (*sedDataCallBack)(uint8_t *data, uint32_t size) = NULL;
 
 #endif

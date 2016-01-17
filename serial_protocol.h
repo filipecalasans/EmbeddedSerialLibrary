@@ -15,19 +15,22 @@ typedef enum {
     SERIAL_MODE_COMMAND /* Hanlds data as a sequence of AT commands */
 }SerialMode;
 
-typedef enum {
+typedef struct{
     bool isConfigured;
     uint16_t headerSizeOffset;
     uint16_t headerSize;
     bool isPayloadSizeFixed;
-    uint16_t payloadSizeOffset     
+    uint16_t payloadSizeOffset;     
     uint16_t payloadSize;
 }PacketDefinition;
+
+#define FIFO_OUT_SIZE 2048
+#define FIFO_IN_SIZE 2048
 
 void initSerialProtocol();
 uint32_t bytesAvailable();
 
-void setSerialMode(SerialMode serialMode);
+void setSerialMode(SerialMode mode);
 SerialMode getSerialMode();
 
 void setPacketDefinition(PacketDefinition definition);
