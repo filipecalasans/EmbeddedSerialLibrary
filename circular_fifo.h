@@ -57,7 +57,6 @@ static uint8_t pop(CircularFifo *fifo) {
 
 static uint8_t peak(CircularFifo *fifo) {
     uint8_t item = fifo->data[fifo->head];
-    fifo->head++;
     return item; 
 }
 
@@ -79,35 +78,54 @@ static void pushMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
 }
 
 
-static void peakMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
-    if(fifo->head + size > fifo->size) {
+static uint32_t peakMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
+    uint32_t sizeAllowed = 0;
+    if(size <= getSize(fifo)) {
+        sizeAllowed = size;
+    }
+    else {
+       sizeAllowed = getSize(fifo); 
+    }
+
+    if(fifo->head + sizeAllowed > fifo->size) {
         uint32_t upperSize = fifo->size - fifo->head;
         memcpy(data, &fifo->data[fifo->head], upperSize);
-        uint32_t lowerSize = size - upperSize;
+        uint32_t lowerSize = sizeAllowed - upperSize;
         memcpy(&data[upperSize], &fifo->data, lowerSize);
     }
     else {
-        memcpy(data, &fifo->data[fifo->head], size);
+        memcpy(data, &fifo->data[fifo->head], sizeAllowed);
     }
+
+    return sizeAllowed;
 }
 
-static void discardMultiple(CircularFifo *fifo, uint32_t size){
-    if(fifo->head + size > fifo->size) {
+static uint32_t discardMultiple(CircularFifo *fifo, uint32_t size){
+    uint32_t sizeAllowed = 0;
+    if(size <= getSize(fifo)) {
+        sizeAllowed = size;
+    }
+    else {
+       sizeAllowed = getSize(fifo); 
+    }
+    if(fifo->head + sizeAllowed > fifo->size) {
         uint32_t upperSize = fifo->size - fifo->head;
-        uint32_t lowerSize = size - upperSize;
+        uint32_t lowerSize = sizeAllowed - upperSize;
         fifo->head = lowerSize;
     }
     else {
-        fifo->head += size;
+        fifo->head += sizeAllowed;
         if(fifo->head >= fifo->size) {
             fifo->head = 0;
         }    
     }
+    return sizeAllowed;
 }
 
-static void popMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
-    peakMultiple(fifo, data, size);   
+static uint32_t popMultiple(CircularFifo *fifo, uint8_t *data, uint32_t size) {
+    uint32_t bytesRead = peakMultiple(fifo, data, size);   
     discardMultiple(fifo, size);
+    return bytesRead;
 }
 
 #endif
