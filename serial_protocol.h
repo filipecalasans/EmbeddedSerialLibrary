@@ -1,6 +1,7 @@
 #ifndef __SERIAL_PROTOCOL_H_
 #define __SERIAL_PROTOCOL_H_
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -24,6 +25,7 @@ typedef struct{
     uint16_t payloadSize;
 }PacketDefinition;
 
+#define MAX_AT_CMD_LENGTH 16
 #define FIFO_OUT_SIZE 2048
 #define FIFO_IN_SIZE 2048
 
@@ -36,6 +38,7 @@ SerialMode getSerialMode();
 void setPacketDefinition(PacketDefinition definition);
 PacketDefinition getPacketDefinition();
 
+inline void dataReceived(uint8_t *data, uint32_t size);
 /* 
    Read number of bytes passed on size variable and
    return number of bytes read. 

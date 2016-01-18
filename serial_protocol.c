@@ -12,8 +12,14 @@ static bool atModeEnable = false;
 static SerialMode serialMode = {0};
 static PacketDefinition packetDefinition = {0};
 
+void (*processRawDataCallBack)() = NULL;
+void (*processCommandCallBack)() = NULL;
+void (*processBinaryPacketCallBack)() = NULL;
+
+void (*sedDataCallBack)(uint8_t *data, uint32_t size) = NULL;
+
 void initSerialProtocol() {
-	initSerialHAL();
+	initSerialUsr();
 	initCircularFifo(&fifoIn, dataBufferIn, FIFO_IN_SIZE);
 	initCircularFifo(&fifoOut, dataBufferOut, FIFO_OUT_SIZE);
 	serialMode = SERIAL_MODE_TRANSPARENT;
@@ -38,6 +44,33 @@ void setPacketDefinition(PacketDefinition definition) {
 
 PacketDefinition getPacketDefinition() {
 	return packetDefinition;
+}
+
+inline void dataReceived(uint8_t *data, uint32_t size) {
+	bool sizeEnough = ((size + getNumElements(&fifoIn)) < getSize(&fifoIn));
+	if(sizeEnough) {
+		switch(serialMode) {
+			case SERIAL_MODE_COMMAND:
+
+			break;
+			case SERIAL_MODE_TRANSPARENT:
+				pushMultiple(&fifoIn, data, size);
+				if(processRawDataCallBack) {
+					processRawDataCallBack();
+				}
+			break;
+			case SERIAL_MODE_BINARY_PACKET:
+				pushMultiple(&fifoIn, data, size);
+				if(processBinaryPacketCallBack) {
+					processBinaryPacketCallBack();
+				}
+			break;
+		}
+	}
+	else {
+		/* Jump to Hardfault */
+		printf("[dataReceived] FIFO IN overflow.\n");
+	}
 }
 
 /* 
@@ -66,15 +99,6 @@ bool readNextCommand(char *commandString) {
     in the variable packetSize. This function returns the number of bytes 
     read.
 */
-//     typedef struct{
-//     bool isConfigured;
-//     uint16_t headerSizeOffset;
-//     uint16_t headerSize;
-//     bool isPayloadSizeFixed;
-//     uint16_t payloadSizeOffset;     
-//     uint16_t payloadSize;
-// }PacketDefinition;
-
 uint32_t readNextPacket(void *packet) {
 	if(packetDefinition.isConfigured) {
 		if(packetDefinition.isPayloadSizeFixed) {
@@ -82,6 +106,9 @@ uint32_t readNextPacket(void *packet) {
 			if(getSize(&fifoIn) >= packetSize) {
 				popMultiple(&fifoIn, (uint8_t*)packet, packetSize);
 				return packetSize;
+			}
+			else {
+				return 0;
 			}
 		}
 		else {
