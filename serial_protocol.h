@@ -42,6 +42,6 @@ uint32_t read(uint8_t *data, uint32_t size);
 */
 uint32_t readNextPacket(void *packet);
 
-
+void setPacketRedyCallBack(void (*callback)(void));
 
 #endif

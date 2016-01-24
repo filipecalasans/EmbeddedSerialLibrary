@@ -8,10 +8,7 @@ uint8_t dataBufferOut[FIFO_OUT_SIZE];
 static uint64_t lastTimeDataReceived = 0;
 static PacketDefinition packetDefinition = {0};
 
-void (*processRawDataCallBack)() = NULL;
-void (*processCommandCallBack)() = NULL;
-void (*processBinaryPacketCallBack)() = NULL;
-
+void (*processBinaryPacketCallBack)(void) = NULL;
 void (*sedDataCallBack)(uint8_t *data, uint32_t size) = NULL;
 
 void initSerialProtocol() {
@@ -91,4 +88,8 @@ uint32_t readNextPacket(void *packet) {
 		}
 	}
 	return 0;
+}
+
+void setPacketRedyCallBack(void (*callback)(void)) {
+	processBinaryPacketCallBack = callback;
 }
