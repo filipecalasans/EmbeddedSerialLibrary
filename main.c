@@ -62,7 +62,7 @@ int main () {
     printf("isEmpty? %d\n", (int)isEmpty(&fifo));
     printf("num elements %d\n", (int)getNumElements(&fifo));
     
-    printf("--------- Multiples Insertions/Remotions\n");
+    printf("--------- Multiples Insertions/Removals\n");
     
     uint8_t insertItens[6] = {1, 2, 4, 8, 10, 12};
     
